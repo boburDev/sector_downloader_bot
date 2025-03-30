@@ -11,11 +11,18 @@ const YT_DLP_PATH = path.join(__dirname, "yt-dlp.exe");
 const MP3_DIR = path.join(__dirname, "../public/mp3");
 const MP4_DIR = path.join(__dirname, "../public/mp4");
 
-// Papkalarni yaratish
 if (!fs.existsSync(MP3_DIR)) fs.mkdirSync(MP3_DIR, { recursive: true });
 if (!fs.existsSync(MP4_DIR)) fs.mkdirSync(MP4_DIR, { recursive: true });
 
-// Video yuklab olish funksiyasi
+function deleteFile(filePath) {
+    setTimeout(() => {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`🗑 Deleted: ${filePath}`);
+        }
+    }, 5000);
+}
+
 function downloadVideo(url, chatId, ctx) {
     try {
         const fileId = Date.now();
@@ -41,14 +48,13 @@ function downloadVideo(url, chatId, ctx) {
                         ]]
                     }
                 }
-            );
+            ).then(() => deleteFile(filePath));
         });
     } catch (error) {
         console.log(error);
     }
 }
 
-// Musiqa yuklab olish
 bot.on("callback_query", async (ctx) => {
     try {
         const chatId = ctx.callbackQuery.message.chat.id;
@@ -79,14 +85,13 @@ bot.on("callback_query", async (ctx) => {
                     caption: `📥 Yuklab olingan musiqa`,
                     parse_mode: "Markdown",
                 }
-            );
+            ).then(() => deleteFile(audioPath));
         });
     } catch (error) {
         console.error("❌ Callback query handlerda xatolik:", error);
     }
 });
 
-// Foydalanuvchi link yuborganda ishlaydi
 bot.on("text", async (ctx) => {
     const url = ctx.message.text;
     if (!url.includes("instagram.com") && !url.includes("youtube.com") && !url.includes("youtu.be")) {
@@ -95,7 +100,6 @@ bot.on("text", async (ctx) => {
     downloadVideo(url, ctx.chat.id, ctx);
 });
 
-// Botni ishga tushirish
 (async () => {
     try {
         bot.launch();
@@ -105,7 +109,6 @@ bot.on("text", async (ctx) => {
     }
 })();
 
-// To‘xtatish eventlari
 process.on('SIGINT', async () => {
     console.log("❌ Bot to‘xtatilmoqda...");
     bot.stop();
