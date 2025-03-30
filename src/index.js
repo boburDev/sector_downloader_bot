@@ -68,56 +68,44 @@ function logError(url, username, chatId, errorMsg) {
 // 📥 Video yuklab olish
 async function downloadVideo(url, chatId, ctx) {
     try {
-        const isYTB = url.includes("youtube.com") || url.includes("youtu.be");
         const fileId = Date.now();
-        const fileName = `video_${fileId}.${isYTB ? "webm" : "mp4"}`;
+        const fileName = `video_${fileId}.mp4`; // Har doim MP4 formatda yuklaymiz
         const filePath = path.join(MP4_DIR, fileName);
 
-        // **ctx.session mavjudligini tekshirish**
-        if (!ctx.session) {
-            ctx.session = {}; // Agar mavjud bo‘lmasa, bo‘sh obyekt sifatida yaratish
-        }
-
-        if (!ctx.session[chatId]) {
-            ctx.session[chatId] = { urls: [] };
-        }
-
-        // **urls massiv ekanligiga ishonch hosil qilish**
-        if (!Array.isArray(ctx.session[chatId].urls)) {
-            ctx.session[chatId].urls = [];
-        }
+        if (!ctx.session) ctx.session = {};
+        if (!ctx.session[chatId]) ctx.session[chatId] = { urls: [] };
+        if (!Array.isArray(ctx.session[chatId].urls)) ctx.session[chatId].urls = [];
 
         ctx.session[chatId].urls.push({ id: fileId, url });
-        
-        const loadingMessage = await ctx.reply("⏳");
-        
-        exec(`"${YT_DLP_PATH}" --age-limit 0 --no-check-certificate -o "${filePath}" "${url}"`, async(error, stdout, stderr) => {
-            if (error) {
-                await ctx.deleteMessage(loadingMessage.message_id);
-                console.error("❌ Yuklab olishda xato:", error);
-                ctx.reply("❌ Video yuklab bo‘lmadi.");
-                logError(url, ctx.from?.username || "Unknown", chatId, stderr);
-                return;
-            }
-            await ctx.deleteMessage(loadingMessage.message_id);
-            ctx.replyWithVideo(
-                { source: filePath },
-                {
-                    caption: `🎵 Musiqa yuklab olish uchun 👇👇\n[MediaDownloader](https://t.me/sector_downloader_bot)`,
-                    parse_mode: "Markdown",
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: "🎵 Download Music", callback_data: `music_${fileId}` }]
-                        ]
-                    }
+
+        const loadingMessage = await ctx.reply("⏳ Yuklab olinmoqda...");
+
+        exec(
+            `"${YT_DLP_PATH}" -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 -o "${filePath}" "${url}"`,
+            async (error, stdout, stderr) => {
+                if (error) {
+                    await ctx.deleteMessage(loadingMessage.message_id);
+                    console.error("❌ Yuklab olishda xato:", error);
+                    ctx.reply("❌ Video yuklab bo‘lmadi.");
+                    logError(url, ctx.from?.username || "Unknown", chatId, stderr);
+                    return;
                 }
-            ).then(() => deleteFile(filePath));
-        });
+                await ctx.deleteMessage(loadingMessage.message_id);
+                ctx.replyWithVideo(
+                    { source: filePath },
+                    {
+                        caption: `📥 Yuklab olindi`,
+                        parse_mode: "Markdown"
+                    }
+                ).then(() => deleteFile(filePath));
+            }
+        );
 
     } catch (error) {
         console.log("❌ Xato:", error);
     }
 }
+
 
 bot.start((ctx) => {
     const chatId = ctx.chat.id;
