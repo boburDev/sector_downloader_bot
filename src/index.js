@@ -44,7 +44,7 @@ function downloadVideo(url, chatId, ctx) {
                     parse_mode: "Markdown",
                     reply_markup: {
                         inline_keyboard: [[
-                            { text: "🎵 Download Music", callback_data: `music_${fileId}` }
+                            { text: "🎵 Download Music", url: "https://t.me/sector_downloader_bot" }
                         ]]
                     }
                 }
