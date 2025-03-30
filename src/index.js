@@ -8,7 +8,7 @@ const path = require("path");
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(new LocalSession({ database: "session.json" }).middleware());
 
-const YT_DLP_PATH = path.join(__dirname, "yt-dlp.exe");
+const YT_DLP_PATH = "/usr/local/bin/yt-dlp";
 const MP3_DIR = path.join(__dirname, "../public/mp3");
 const MP4_DIR = path.join(__dirname, "../public/mp4");
 const ERROR_LOG = path.join(__dirname, "error_download.json");
