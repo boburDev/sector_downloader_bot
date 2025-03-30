@@ -68,8 +68,9 @@ function logError(url, username, chatId, errorMsg) {
 // 📥 Video yuklab olish
 async function downloadVideo(url, chatId, ctx) {
     try {
+        const isYTB = url.includes("youtube.com") || url.includes("youtu.be");
         const fileId = Date.now();
-        const fileName = `video_${fileId}.mp4`;
+        const fileName = `video_${fileId}.${isYTB ? "webm" : "mp4"}`;
         const filePath = path.join(MP4_DIR, fileName);
 
         // **ctx.session mavjudligini tekshirish**
@@ -98,10 +99,9 @@ async function downloadVideo(url, chatId, ctx) {
                 logError(url, ctx.from?.username || "Unknown", chatId, stderr);
                 return;
             }
-            const isYTB = url.includes("youtube.com") || url.includes("youtu.be");
             await ctx.deleteMessage(loadingMessage.message_id);
             ctx.replyWithVideo(
-                { source: isYTB ? `${filePath}.webm` : filePath },
+                { source: filePath },
                 {
                     caption: `🎵 Musiqa yuklab olish uchun 👇👇\n[MediaDownloader](https://t.me/sector_downloader_bot)`,
                     parse_mode: "Markdown",
