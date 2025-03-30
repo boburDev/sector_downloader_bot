@@ -66,7 +66,7 @@ function logError(url, username, chatId, errorMsg) {
 }
 
 // 📥 Video yuklab olish
-function downloadVideo(url, chatId, ctx) {
+async function downloadVideo(url, chatId, ctx) {
     try {
         const fileId = Date.now();
         const fileName = `video_${fileId}.mp4`;
@@ -87,15 +87,19 @@ function downloadVideo(url, chatId, ctx) {
         }
 
         ctx.session[chatId].urls.push({ id: fileId, url });
-
-        exec(`"${YT_DLP_PATH}" --age-limit 0 --no-check-certificate -o "${filePath}" "${url}"`, (error, stdout, stderr) => {
+        
+        const loadingMessage = await ctx.reply("⏳");
+        
+        exec(`"${YT_DLP_PATH}" --age-limit 0 --no-check-certificate -o "${filePath}" "${url}"`, async(error, stdout, stderr) => {
             if (error) {
+                await ctx.deleteMessage(loadingMessage.message_id);
                 console.error("❌ Yuklab olishda xato:", error);
                 ctx.reply("❌ Video yuklab bo‘lmadi.");
                 logError(url, ctx.from?.username || "Unknown", chatId, stderr);
                 return;
             }
-
+            
+            await ctx.deleteMessage(loadingMessage.message_id);
             ctx.replyWithVideo(
                 { source: filePath },
                 {
