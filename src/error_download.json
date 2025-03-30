@@ -1,0 +1,16 @@
+[
+  {
+    "time": "2025-03-30T20:32:08.316Z",
+    "url": "https://www.instagram.com/reel/C_QXIlNi5zR/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+    "username": "Fine_o_k",
+    "chatId": 5204402064,
+    "error": "ERROR: [Instagram] C_QXIlNi5zR: Restricted Video: You must be 18 years old or over to see this video. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies\n"
+  },
+  {
+    "time": "2025-03-30T20:40:39.982Z",
+    "url": "https://www.instagram.com/reel/DByUUxSzDIO/?igsh=N210emVuZjNzdjVw",
+    "username": "Fine_o_k",
+    "chatId": 5204402064,
+    "error": "ERROR: [Instagram] DByUUxSzDIO: Restricted Video: You must be 18 years old or over to see this video. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies\n"
+  }
+]
