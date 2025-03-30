@@ -95,7 +95,12 @@ async function downloadVideo(url, chatId, ctx) {
                     { source: filePath },
                     {
                         caption: `📥 Yuklab olindi`,
-                        parse_mode: "Markdown"
+                        parse_mode: "Markdown",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: "🎵 Download Music", callback_data: `music_${fileId}` }]
+                            ]
+                        }
                     }
                 ).then(() => deleteFile(filePath));
             }
