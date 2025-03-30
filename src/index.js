@@ -8,24 +8,30 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.use(new LocalSession({ database: "session.json" }).middleware());
 const YT_DLP_PATH = path.join(__dirname, "yt-dlp.exe");
+const MP3_DIR = path.join(__dirname, "../public/mp3");
+const MP4_DIR = path.join(__dirname, "../public/mp4");
+
+// Papkalarni yaratish
+if (!fs.existsSync(MP3_DIR)) fs.mkdirSync(MP3_DIR, { recursive: true });
+if (!fs.existsSync(MP4_DIR)) fs.mkdirSync(MP4_DIR, { recursive: true });
 
 // Video yuklab olish funksiyasi
 function downloadVideo(url, chatId, ctx) {
     try {
         const fileId = Date.now();
         const fileName = `video_${fileId}.mp4`;
+        const filePath = path.join(MP4_DIR, fileName);
 
-        // URL saqlab qo'yamiz
         ctx.session[chatId] = { url, fileName };
 
-        exec(`"${YT_DLP_PATH}" -o ${fileName} "${url}"`, (error) => {
+        exec(`"${YT_DLP_PATH}" -o "${filePath}" "${url}"`, (error) => {
             if (error) {
                 console.error("❌ Yuklab olishda xato:", error);
                 return ctx.reply("❌ Video yuklab bo‘lmadi.");
             }
 
             ctx.replyWithVideo(
-                { source: fileName },
+                { source: filePath },
                 {
                     caption: `🎵 Musiqa yuklab olish uchun 👇👇\n@MediaDownloader`,
                     parse_mode: "Markdown",
@@ -42,7 +48,7 @@ function downloadVideo(url, chatId, ctx) {
     }
 }
 
-// Callback tugma bosilganda musiqa yuklab olish
+// Musiqa yuklab olish
 bot.on("callback_query", async (ctx) => {
     try {
         const chatId = ctx.callbackQuery.message.chat.id;
@@ -55,46 +61,37 @@ bot.on("callback_query", async (ctx) => {
         const { url } = sessionData;
         const fileId = Date.now();
         const audioFile = `music_${fileId}.mp3`;
+        const audioPath = path.join(MP3_DIR, audioFile);
 
-        // ⏳ Yuklanmoqda... xabarini yuborish
-        const loadingMessage = await ctx.reply("⏳");
+        const loadingMessage = await ctx.reply("⏳ Musiqa yuklanmoqda...");
 
-        // **Musiqani yuklab olish**
-        exec(`"${YT_DLP_PATH}" -x --audio-format mp3 -o "${audioFile}" "${url}"`, async (error) => {
+        exec(`"${YT_DLP_PATH}" -x --audio-format mp3 -o "${audioPath}" "${url}"`, async (error) => {
             if (error) {
                 console.error("❌ Musiqa yuklab olishda xato:", error);
                 await ctx.deleteMessage(loadingMessage.message_id);
                 return ctx.reply("❌ Musiqa yuklab bo‘lmadi.");
             }
 
-            // ⏳ Yuklanmoqda... xabarini o‘chirish
             await ctx.deleteMessage(loadingMessage.message_id);
-
-            // **Musiqani yuborish**
             await ctx.replyWithAudio(
-                { source: audioFile },
+                { source: audioPath },
                 {
                     caption: `📥 Yuklab olingan musiqa`,
                     parse_mode: "Markdown",
                 }
             );
-
-            fs.unlinkSync(audioFile); // Faylni o‘chiramiz
         });
-
     } catch (error) {
         console.error("❌ Callback query handlerda xatolik:", error);
     }
 });
 
-
-// Botga link yuborilganda ishlaydi
+// Foydalanuvchi link yuborganda ishlaydi
 bot.on("text", async (ctx) => {
     const url = ctx.message.text;
     if (!url.includes("instagram.com") && !url.includes("youtube.com") && !url.includes("youtu.be")) {
         return ctx.reply("❌ Iltimos, faqat Instagram yoki YouTube havolasini yuboring.");
     }
-
     downloadVideo(url, ctx.chat.id, ctx);
 });
 
