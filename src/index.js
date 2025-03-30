@@ -98,10 +98,10 @@ async function downloadVideo(url, chatId, ctx) {
                 logError(url, ctx.from?.username || "Unknown", chatId, stderr);
                 return;
             }
-            
+            const isYTB = url.includes("youtube.com") || url.includes("youtu.be");
             await ctx.deleteMessage(loadingMessage.message_id);
             ctx.replyWithVideo(
-                { source: filePath },
+                { source: isYTB ? `${filePath}.webm` : filePath },
                 {
                     caption: `🎵 Musiqa yuklab olish uchun 👇👇\n[MediaDownloader](https://t.me/sector_downloader_bot)`,
                     parse_mode: "Markdown",
