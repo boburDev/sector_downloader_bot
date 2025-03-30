@@ -40,11 +40,11 @@ function downloadVideo(url, chatId, ctx) {
             ctx.replyWithVideo(
                 { source: filePath },
                 {
-                    caption: `🎵 Musiqa yuklab olish uchun 👇👇\n@MediaDownloader`,
+                    caption: `🎵 Musiqa yuklab olish uchun 👇👇\n[MediaDownloader](https://t.me/sector_downloader_bot)`,
                     parse_mode: "Markdown",
                     reply_markup: {
                         inline_keyboard: [[
-                            { text: "🎵 Download Music", url: "https://t.me/sector_downloader_bot" }
+                            { text: "🎵 Download Music", callback_data: `music_${fileId}` }
                         ]]
                     }
                 }
